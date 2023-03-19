@@ -1,0 +1,84 @@
+-- FRANCISCO JAVIER BLÁZQUEZ MARTÍNEZ  ~  frblazqu@ucm.es
+--   Doble grado Ingeniería informática - Matemáticas
+--
+-- Comentarios:
+-- Aparecen muchos warning causados por el hecho de que he llamado igual a las variables auxiliares que he 
+-- usado para simplificar el coste de ejecución en varios apartados. He usado el natural join en vez de el
+-- zjoin (x and select) en varios casos por lo que puede que haya abusado del rename, la única operación que
+-- me daba problemas serios al reutilizar nombres de variables.
+--
+--
+-- En esta versión no aparecen los warnings debido a que he renombrado las variables que se repetían. No me
+-- queda del todo claro que causaba el error, por qué al pedir que se muestre una vista no tiene el mismo
+-- valor que se le asignó simplemente porque se cambien las variables intermedias.
+
+-- 0.- Eliminamos todos los datos que pudiéramos tener
+/abolish
+
+-- 1.- Definimos las tablas que vamos a necesitar.
+create table programadores(dni string primary key, nombre string, dirección string, teléfono string);
+create table analistas    (dni string primary key, nombre string, dirección string, teléfono string);
+create table distribución(códigopr string, dniemp string, horas int, primary key (códigopr, dniemp));
+create table proyectos(código string primary key, descripción string, dnidir string);
+
+-- 2.- Introducimos los datos en nuestra base.
+insert into  programadores(dni, nombre, dirección, teléfono) values('1','Jacinto','Jazmín 4','91-8888888');
+insert into  programadores(dni, nombre, dirección, teléfono) values('2','Herminia','Rosa 4','91-7777777');
+insert into  programadores(dni, nombre, dirección, teléfono) values('3','Calixto','Clavel 3','91-1231231');
+insert into  programadores(dni, nombre, dirección, teléfono) values('4','Teodora','Petunia 3','91-6666666');
+
+insert into  analistas(dni, nombre, dirección, teléfono) values('4','Teodora','Petunia 3','91-6666666');
+insert into  analistas(dni, nombre, dirección, teléfono) values('5','Evaristo','Luna 1','91-1111111');
+insert into  analistas(dni, nombre, dirección, teléfono) values('6','Luciana','Júpiter 2','91-8888888');
+insert into  analistas(dni, nombre, dirección, teléfono) values('7','Nicodemo','Plutón 3', NULL);
+
+insert into distribución(códigopr, dniemp, horas) values('P1','1',10);
+insert into distribución(códigopr, dniemp, horas) values('P1','2',40);
+insert into distribución(códigopr, dniemp, horas) values('P1','4',5);
+insert into distribución(códigopr, dniemp, horas) values('P2','4',10);
+insert into distribución(códigopr, dniemp, horas) values('P3','1',10);
+insert into distribución(códigopr, dniemp, horas) values('P3','3',40);
+insert into distribución(códigopr, dniemp, horas) values('P3','4',5);
+insert into distribución(códigopr, dniemp, horas) values('P3','5',30);
+insert into distribución(códigopr, dniemp, horas) values('P4','4',20);
+insert into distribución(códigopr, dniemp, horas) values('P4','5',10);
+
+insert into proyectos(código, descripción, dnidir) values('P1','Nómina','4');
+insert into proyectos(código, descripción, dnidir) values('P2','Contabilidad','4');
+insert into proyectos(código, descripción, dnidir) values('P3','Producción','5');
+insert into proyectos(código, descripción, dnidir) values('P4','Clientes','5');
+insert into proyectos(código, descripción, dnidir) values('P5','Ventas','6');
+
+-- 3.- Realizamos las consultas
+vista1 := project dni (programadores) union     project dni (analistas);
+vista2 := project dni (programadores) intersect project dni (analistas);
+vista3 := (vista1 difference project dnidir (proyectos)) difference project dniemp (distribución);
+
+r1 := project código (proyectos);				-- Todos los códigos de proyectos
+r2 := project códigopr,dniemp (distribución);	-- Códigos de proyecto y dni empleados
+r3 := project dni (analistas);					-- Dni de todos los analistas
+r4 := rename r4(códigopr,dni) (r2);				-- Solo para evitar redundancia (se puede hacer con zjoin)
+r5 := r4 njoin r3;								-- Nos quedamos con pares códigoproyecto-analista en él
+vista4 := r1 difference (project códigopr (r5));
+vista5 := (project dni (analistas) difference vista2) intersect project dnidir (proyectos);
+
+p1 := project código,descripción (proyectos); 		-- No queremos a los directores de proyectos
+p2 := rename p2(código,dni,horas) (distribución);	-- Preparamos un njoin (para no hacer un zjoin)
+p3 := project dni,nombre (programadores);			-- No queremos la dirección ni el tlf de los prog.
+p4 := p2 njoin p1;									-- Juntamos descripción-horas-dni del empleado
+p5 := p4 njoin p3;									-- Juntamos el nombre del empleado (ya sobra código)
+vista6 := project descripción,nombre,horas (p5);
+
+q1 := project dni,teléfono (programadores) union project dni,teléfono (analistas); -- Dnis y tlfs.
+q2 := rename q2(dnie, telf) (q1);											       -- Copiamos
+q3 := q2 zjoin dni!=dnie and teléfono=telf q1;	      -- Aparecen duplicados!!     -- Buscamos los repets.
+vista7 := project teléfono (q3);
+
+-- 4.- Mostramos el resultado obtenido
+select true (vista1);
+select true (vista2);
+select true (vista3);
+select true (vista4);
+select true (vista5);
+select true (vista6);
+select true (vista7);

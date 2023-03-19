@@ -1,0 +1,73 @@
+CREATE TABLE cuentas 
+(
+    numero number primary key,
+    saldo  number not null
+);
+
+INSERT INTO cuentas VALUES (123, 400);
+INSERT INTO cuentas VALUES (456, 300);
+COMMIT;
+
+Table CUENTAS creado.
+1 fila insertadas.
+1 fila insertadas.
+Confirmación terminada.
+
+
+// Ir a:
+// Menú -> Inicio -> Programas -> BBDD -> Oracle -> Consola de Oracle 11g
+
+// Abrir dos sesiones:
+// C:> sqlplus usuario@BD as psswd
+
+// En la sesión 1:
+
+C:> SET AUTOCOMMIT OFF
+C:> update cuentas set saldo=saldo+100 where numero=123
+C:> COMMIT;
+
+SQL> SET AUTOCOMMIT OFF
+SQL> update cuentas set saldo=saldo+100 where numero=123
+  2  update cuentas set saldo=saldo+100 where numero=123;
+update cuentas set saldo=saldo+100 where numero=123
+*
+ERROR en lÝnea 2:
+ORA-00933: comando SQL no terminado correctamente
+
+
+SQL> update cuentas set saldo=saldo+100 where numero=123;
+
+1 fila actualizada.
+
+SQL> COMMIT;
+
+Confirmaci¾n terminada.
+
+
+// En la sesión 2:
+
+C:> SET AUTOCOMMIT OFF
+C:> select saldo from cuentas where numero=123 //Antes del commit de la sesión 1
+C:> select saldo from cuentas where numero=123 //Dsps. del commit de la sesión 1
+
+
+SQL> SET AUTOCOMMIT OFF
+SQL> select saldo from cuentas where numero=123
+  2
+SQL> select saldo from cuentas where numero=123;
+
+     SALDO
+----------
+       400
+
+SQL> select saldo from cuentas where numero=123;
+
+     SALDO
+----------
+       400
+
+SQL> select saldo from cuentas where numero=123;
+
+     SALDO
+----------
+       500

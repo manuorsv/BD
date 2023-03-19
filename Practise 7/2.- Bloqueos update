@@ -1,0 +1,42 @@
+Explicar el comportamiento de las siguientes transacciones:
+
+// Desde la sesión 1:
+
+C:> SET AUTOCOMMIT OFF
+C:> update cuentas set saldo=saldo+100 where numero=123
+C:> COMMIT
+C:> select saldo from cuentas where numero=123
+C:> select saldo from cuentas where numero=123
+
+// Desde la sesión 2:
+
+C:> SET AUTOCOMMIT OFF
+C:> update cuentas set saldo=saldo+200 where numero=123
+C:> COMMIT
+C:> select saldo from cuentas where numero=123
+
+
+T1> update cuentas set saldo=saldo+100 where numero=123
+T2> update cuentas set saldo=saldo+200 where numero=123
+
+// Se queda pillado, esperando a confirmación de cambios.
+// Si no me equivoco espera a que T1 termine para poder hacer ella la actualización.
+
+T1> COMMIT;
+
+// T2 ahora si que puede hacer su actualización (sobre los datos modificados por T1)
+
+T1> select saldo from cuentas where numero=123;
+
+     SALDO
+----------
+       600
+	   
+	   
+T2> COMMIT;
+T1> select saldo from cuentas where numero=123;
+     SALDO
+----------
+       800
+
+

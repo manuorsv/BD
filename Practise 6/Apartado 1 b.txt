@@ -1,0 +1,41 @@
+CREATE OR REPLACE TRIGGER trigger_pedidos
+AFTER INSERT OR DELETE OR UPDATE ON pedidos
+
+DECLARE
+fechaInsert char(10);
+horaInsert char(8);
+    
+BEGIN
+
+fechaInsert := to_char(sysdate,'dd/mm/yyyy');
+horaInsert := to_char(sysdate,'hh:mi:ss');
+    
+IF INSERTING THEN
+    INSERT INTO auditoría VALUES ('INSERT', 'pedidos', fechaInsert, horaInsert);
+ELSIF  DELETING THEN
+    INSERT INTO auditoría VALUES ('DELETE', 'pedidos', fechaInsert, horaInsert);
+ELSIF UPDATING THEN
+    INSERT INTO auditoría VALUES ('UPDATE', 'pedidos', fechaInsert, horaInsert);
+END IF;
+
+END;
+
+--Salida del servidor:
+Trigger TRIGGER_PEDIDOS compilado
+
+--Probamos casos:
+INSERT INTO pedidos VALUES('111111', '16/10/2016', 545, 'Petrenko', 'Hola');
+UPDATE pedidos SET cliente = 'Alcatraz' WHERE código = '111111';
+DELETE FROM pedidos WHERE código = '111111';
+
+--Salida del servidor:
+1 fila insertadas.
+
+
+1 fila actualizadas.
+
+
+1 fila eliminado
+
+
+

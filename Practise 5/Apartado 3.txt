@@ -1,0 +1,14 @@
+-- Carga de datos en la tabla "Domicilios I"
+sqlldr userid=DG04@BDd/DG04PWD control='Domicilios I.ctl' log='Domicilios I informe.txt'
+
+SQL*Loader: Release 11.2.0.1.0 - Production on Jue Nov 22 18:31:10 2018
+Copyright (c) 1982, 2009, Oracle and/or its affiliates.  All rights reserved.
+Punto de confirmaci¾n alcanzado - recuento de registros l¾gicos 4
+
+-- Carga de datos en la tabla "Códigos postales I"
+sqlldr userid=DG04@BDd/DG04PWD control='Códigos postales I.ctl' log='Códigos postales I informe.txt'
+
+SQL*Loader: Release 11.2.0.1.0 - Production on Jue Nov 22 18:32:22 2018
+Copyright (c) 1982, 2009, Oracle and/or its affiliates.  All rights reserved.
+Punto de confirmaci¾n alcanzado - recuento de registros l¾gicos 7
+

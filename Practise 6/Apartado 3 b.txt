@@ -1,0 +1,11 @@
+BEGIN
+FOR i IN 1..50000
+LOOP
+
+INSERT INTO Pedidos VALUES (i, '06/01/2015', 10.0, 'C' || i, ' ');
+
+END LOOP;
+END;
+
+
+Procedimiento PL/SQL terminado correctamente.

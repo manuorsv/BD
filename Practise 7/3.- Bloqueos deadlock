@@ -1,0 +1,25 @@
+Explicar el comportamiento de las siguientes transacciones (simultáneas):
+
+// Desde T1:
+
+C:> SET AUTOCOMMIT OFF
+C:> update cuentas set saldo=saldo+100 where cuenta=123
+C:> update cuentas set saldo=saldo+300 where cuenta=456
+
+// Desde T2:
+
+C:> SET AUTOCOMMIT OFF
+C:> update cuentas set saldo=saldo+200 where cuenta=456
+C:> update cuentas set saldo=saldo+400 where cuenta=123
+
+
+T1> update cuentas set saldo=saldo+100 where numero=123;
+1 fila actualizada.
+
+T2> update cuentas set saldo=saldo+200 where numero=456;
+1 fila actualizada.
+
+T1> update cuentas set saldo=saldo+300 where numero=456;
+T2> update cuentas set saldo=saldo+400 where numero=123;
+T1> ERROR en lÝnea 1:
+	ORA-00060: detectado interbloqueo mientras se esperaba un recurso

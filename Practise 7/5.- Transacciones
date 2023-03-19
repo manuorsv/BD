@@ -1,0 +1,315 @@
+
+
+1.- Crear las tablas y secuencias para identificadores:
+
+CREATE TABLE butacas
+(
+    id number(8) primary key,
+    evento varchar(30),
+    fila varchar(10),
+    columna varchar(10)
+);
+
+Tabla creada.
+
+CREATE TABLE reservas
+(
+    id number(8) primary key,
+    evento varchar(30),
+    fila varchar(10),
+    columna varchar(10)
+);
+
+Tabla creada.
+
+CREATE SEQUENCE Seq_Butacas  INCREMENT BY 1 START WITH 1 NOMAXVALUE;
+Secuencia creada.
+
+CREATE SEQUENCE Seq_Reservas INCREMENT BY 1 START WITH 1 NOMAXVALUE;
+Secuencia creada.
+
+2.- Inserción de unos primeros valores:
+
+INSERT INTO butacas VALUES (Seq_Butacas.NEXTVAL,'Circo','1','1');
+1 fila creada.
+INSERT INTO butacas VALUES (Seq_Butacas.NEXTVAL,'Circo','1','2');
+1 fila creada.
+
+INSERT INTO butacas VALUES (Seq_Butacas.NEXTVAL,'Circo','1','3');
+1 fila creada.
+
+COMMIT;
+Confirmaci¾n terminada.
+
+3.- Probar el script para reservar una butaca:
+  //Primero modificar la ruta que contiene a los scripts auxiliares
+  //hlocal/Pr7/scripts
+	
+SQL> @'C:\hlocal\Pr7\scripts\script.sql'
+
+:V_ERROR
+--------------------------------
+
+
+INFO: Se intenta reservar.
+
+Procedimiento PL/SQL terminado correctamente.
+
+
+SCRIPT_COL
+----------------------------------------
+"C:\hlocal\Pr7\scripts\preguntar.sql"
+
+
+V_ERROR
+--------------------------------
+false
+
+'┬┐Confirmar la reserva?'
+s
+s
+
+SCRIPT_COL
+----------------------------------------
+"C:\hlocal\Pr7\scripts\preguntar.sql"
+
+INFO: Localidad reservada.
+
+Procedimiento PL/SQL terminado correctamente.
+
+
+Confirmaci¾n terminada.
+
+4.- 
+SQL> @'C:\hlocal\Pr7\scripts\script.sql'
+
+Confirmaci¾n terminada.
+
+ERROR: La localidad ya est├í reservada.
+
+Procedimiento PL/SQL terminado correctamente.
+
+
+SCRIPT_COL
+----------------------------------------
+"C:\hlocal\Pr7\scripts\no_preguntar.sql"
+
+
+V_ERROR
+--------------------------------
+true
+
+n
+
+SCRIPT_COL
+----------------------------------------
+"C:\hlocal\Pr7\scripts\no_preguntar.sql"
+
+INFO: No se ha reservado la localidad.
+
+Procedimiento PL/SQL terminado correctamente.
+
+
+Confirmaci¾n terminada.
+
+5.-
+SQL> @'C:\hlocal\Pr7\scripts\script.sql'
+
+Confirmaci¾n terminada.
+
+ERROR: No existe esa localidad.
+
+Procedimiento PL/SQL terminado correctamente.
+
+
+SCRIPT_COL
+----------------------------------------
+"C:\hlocal\Pr7\scripts\no_preguntar.sql"
+
+
+V_ERROR
+--------------------------------
+true
+
+n
+
+SCRIPT_COL
+----------------------------------------
+"C:\hlocal\Pr7\scripts\no_preguntar.sql"
+
+INFO: No se ha reservado la localidad.
+
+Procedimiento PL/SQL terminado correctamente.
+
+
+Confirmaci¾n terminada.
+
+6.-
+SQL> @'C:\hlocal\Pr7\scripts\script.sql'
+
+Confirmaci¾n terminada.
+
+INFO: Se intenta reservar.
+
+Procedimiento PL/SQL terminado correctamente.
+
+
+SCRIPT_COL
+----------------------------------------
+"C:\hlocal\Pr7\scripts\preguntar.sql"
+
+
+V_ERROR
+--------------------------------
+false
+
+'┬┐Confirmar la reserva?'
+s
+s
+
+SCRIPT_COL
+----------------------------------------
+"C:\hlocal\Pr7\scripts\preguntar.sql"
+
+INFO: Localidad reservada.
+
+Procedimiento PL/SQL terminado correctamente.
+
+
+Confirmaci¾n terminada.
+
+SQL> select * from reservas;
+
+        ID EVENTO                         FILA       COLUMNA
+---------- ------------------------------ ---------- ----------
+         2 Circo                          1          1
+         4 Circo                          1          2
+         3 Circo                          1          2
+  
+ 
+
+
+
+
+
+9.- Script:
+--SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+SET serveroutput ON size 1000000;
+set define on;
+SET echo OFF;
+SET verify OFF;
+def v_evento='Circo';
+def v_fila='1';
+def v_columna='3';
+variable v_error char(20)
+
+/
+declare
+  v_existe varchar(20) default null;
+begin
+  select count(*) into v_existe from butacas where evento='&v_evento' and fila='&v_fila' and columna='&v_columna';
+  if v_existe<>'0' then 
+    select count(*) into v_existe from reservas where evento='&v_evento' and fila='&v_fila' and columna='&v_columna';
+    if v_existe='0' then
+      dbms_output.put_line('INFO: Se intenta reservar.');
+      :v_error:='false';
+    else
+      dbms_output.put_line('ERROR: La localidad ya está reservada.');
+      :v_error:='true';
+    end if;
+  else
+    dbms_output.put_line('ERROR: No existe esa localidad.');
+    :v_error:='true';
+  end if;
+end;
+/
+col SCRIPT_COL new_val SCRIPT
+select decode(:v_error,'false               ','"C:\hlocal\Pr7\scripts\preguntar.sql"',
+                               '"C:\hlocal\Pr7\scripts\no_preguntar.sql"') as SCRIPT_COL from dual;
+print :v_error
+--prompt 'Valor script: '&SCRIPT
+@ &SCRIPT
+prompt &v_confirmar
+/
+
+declare
+  v_existe varchar(20) default null;
+begin
+  select count(*) into v_existe from reservas where evento='&v_evento' and fila='&v_fila' and columna='&v_columna';
+  
+  if '&v_confirmar'='s' and :v_error='false' and v_existe='0' then
+  
+    insert into reservas values (Seq_Reservas.NEXTVAL,'&v_evento','&v_fila','&v_columna');
+    dbms_output.put_line('INFO: Localidad reservada.');
+  else
+    dbms_output.put_line('INFO: No se ha reservado la localidad.');
+  end if;
+end;
+/
+COMMIT;
+
+T2> @'C:\hlocal\Pr7\scripts\script.sql'
+
+INFO: Se intenta reservar.
+
+Procedimiento PL/SQL terminado correctamente.
+
+
+SCRIPT_COL
+----------------------------------------
+"C:\hlocal\Pr7\scripts\preguntar.sql"
+
+
+V_ERROR
+--------------------------------
+false
+
+'┬┐Confirmar la reserva?'
+s
+s
+
+SCRIPT_COL
+----------------------------------------
+"C:\hlocal\Pr7\scripts\preguntar.sql"
+
+INFO: Localidad reservada.
+
+Procedimiento PL/SQL terminado correctamente.
+
+
+Confirmaci¾n terminada.
+
+T1> @'C:\hlocal\Pr7\scripts\script.sql'
+
+Confirmaci¾n terminada.
+
+INFO: Se intenta reservar.
+
+Procedimiento PL/SQL terminado correctamente.
+
+
+SCRIPT_COL
+----------------------------------------
+"C:\hlocal\Pr7\scripts\preguntar.sql"
+
+
+V_ERROR
+--------------------------------
+false
+
+'┬┐Confirmar la reserva?'
+s
+s
+
+SCRIPT_COL
+----------------------------------------
+"C:\hlocal\Pr7\scripts\preguntar.sql"
+
+INFO: No se ha reservado la localidad.
+
+Procedimiento PL/SQL terminado correctamente.
+
+
+Confirmaci¾n terminada.
+
+ 

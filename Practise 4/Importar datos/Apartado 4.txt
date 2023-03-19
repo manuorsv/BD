@@ -1,0 +1,66 @@
+-- FRANCISCO JAVIER BLÁZQUEZ MARTÍNEZ  ~  frblazqu@ucm.es
+-- MANUEL ORTEGA SALVADOR              ~  manuor01@ucm.es
+--
+--   Doble grado Ingeniería informática - Matemáticas
+--	 Universidad Complutense de Madrid.
+--
+-- Comentarios adicionales sobre la inserción de datos en
+-- nuestra base desde ficheros de texto plano:
+
+0.- Observaciones:
+    La mayor parte de los errores a la hora de realizar este apartado tienen que
+    ver primero con el problema de la codificación de caracteres, se exige que la
+    tabla de destino exista para poder insertar los datos, pero esto se controla
+    con su identificador de caracteres. La otra gran carencia es que parece no 
+    haber forma (que seguro que habrá pero la desconocemos) de cómo consultar el
+    esquema de datos de una tabla existente, así como los identificadores de sus
+    atributos.
+    
+1.- Tabla EMPLEADOS:
+    No ha habido errores de importación, las cuatro tuplas
+    se han cargado correctamente.
+    
+2.- Tabla CÓDIGOS POSTALES:
+    Un código postal rechazado. En el fichero "Códigos postales.bad"
+    observamos que aparece la tupla (28040;Madrid;Madrid). 
+    
+    En el informe nos aparece que solamente una fila no se ha cargado
+    por "Errores de datos". Se detalla en concreto el siguiente error:
+    
+    Registro 7: Rechazado - Error en tabla "Códigos postales".
+    ORA-00001: restricción única (CC04.SYS_C0013070) violada
+    
+    Lo que ha sucedido es que hemos intentado insertar una tupla con clave
+    primaria repetida.
+    
+3.- Tabla DOMICILIOS:
+    Un domicilio rechazado. En el fichero "Domicilios.bad" aparece la 
+    tupla (12345678L;Diamante;15200;). 
+    
+    En el informe aparece que únicamente se ha rechazado una tupla por
+    el siguiente error:
+    
+    Registro 5: Rechazado - Error en tabla DOMICILIOS.
+    ORA-02291: restricción de integridad (CC04.SYS_C0013073) 
+    violada - clave principal no encontrada
+    
+    En este caso es relativamente sencillo ver el error por el escaso 
+    número de elementos en las tablas. El DNI es correcto, la calle no es
+    nula luego el problema es el código postal, que no se encuentra en la
+    tabla, luego se viola la restricción de referencia.
+    
+4.- Tabla TELÉFONOS:
+    Una tupla rechazada. En el fichero "Teléfonos.bad" aparece la tupla
+    (12345789P;913333333;).
+    
+    El error por el que se ha rechazado esta tupla es:
+    
+    Registro 4: Rechazado - Error en tabla TELÉFONOS.
+    ORA-02291: restricción de integridad (CC04.SYS_C0013075) 
+    violada - clave principal no encontrada
+    
+    Por supuesto que no se ha encontrado el DNI en la tabla empleados pues su
+    formato es erróneo (tiene un caracter más). Es por esto por lo que ha sido
+    rechazada, no se encuentra el DNI en Empleados.DNI por lo que la restricción
+    de ingegridad no podría respetarse.
+    

@@ -1,0 +1,82 @@
+/* Creación del disparador */
+CREATE OR REPLACE TRIGGER trigger_contiene 
+
+/* Cuando dispararlo */ 
+AFTER INSERT OR DELETE OR UPDATE ON contiene
+/* Para cada fila modificada */
+FOR EACH ROW
+
+DECLARE    
+    numeroApariciones INTEGER;
+    
+    precioPlatoNulo EXCEPTION;
+    numUnidadesNulo EXCEPTION;
+    pedidoNoEncontrado EXCEPTION; /* FALTA CONTROLAR ESTO!! */
+    
+BEGIN
+
+IF INSERTING THEN
+    
+    SELECT count(*)
+    INTO  numeroApariciones
+    FROM pedidos
+    WHERE pedidos.código=:NEW.pedido;
+    
+    IF numeroApariciones<1 THEN
+        DBMS_OUTPUT.put_line('El código de pedido no se ha encontrado');
+        RAISE pedidoNoEncontrado;
+    ELSIF :NEW.precio IS NULL THEN
+        DBMS_OUTPUT.put_line('Precio del plato no especificado');
+        RAISE precioPlatoNulo;
+    ELSIF :NEW.unidades IS NULL THEN
+        DBMS_OUTPUT.put_line('Número de unidades no especificado');
+        RAISE numUnidadesNulo;
+    END IF;    
+
+    UPDATE pedidos
+    SET    importe = pedidos.importe + :NEW.precio * :NEW.unidades
+    WHERE pedidos.código = :NEW.pedido; 
+
+ELSIF DELETING THEN
+
+    UPDATE pedidos
+    SET    importe = pedidos.importe - :OLD.precio * :OLD.unidades
+    WHERE pedidos.código = :OLD.pedido; 
+
+ELSIF UPDATING THEN
+
+    IF :NEW.precio IS NULL THEN
+        DBMS_OUTPUT.put_line('Precio del plato no especificado');
+        RAISE precioPlatoNulo;
+    ELSIF :NEW.unidades IS NULL THEN
+        DBMS_OUTPUT.put_line('Número de unidades no especificado');
+        RAISE numUnidadesNulo;
+    END IF;   
+    
+    UPDATE pedidos
+    SET    importe = pedidos.importe - :OLD.precio * :OLD.unidades
+                                     + :NEW.precio * :NEW.unidades
+    WHERE  pedidos.código = :NEW.pedido;
+    
+END IF;
+
+
+END;
+
+SHOW ERRORS;
+select * from pedidos;
+select * from contiene;
+select * from auditoría;
+delete contiene;
+delete pedidos;
+
+insert into pedidos values('1', '12/12/2015', 213, 'A', '');
+insert into pedidos values('2', '01/01/01', 0, 'B', '');
+
+insert into contiene values('1', 'Macarrones', 5, 2);
+insert into contiene values('1', 'Coca colas', 2, 5);
+insert into contiene values('1', 'Coca colas', 2, NULL);
+
+insert into contiene values('111111', 'Macarros',10.0, 2);
+update contiene set unidades = 1 where pedido='111111' and plato = 'Macarros';
+delete from contiene where plato='Macarros';

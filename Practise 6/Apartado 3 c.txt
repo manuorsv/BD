@@ -1,0 +1,29 @@
+SET TIMING ON
+SELECT * FROM Pedidos WHERE Cliente = 'C50000';
+
+
+//	CON ÍNDICE
+Procedimiento PL/SQL terminado correctamente.
+>>Query Run In:Resultado de la Consulta
+Transcurrido: 00:00:00.601
+>>Query Run In:Resultado de la Consulta 1
+Transcurrido: 00:00:00.609
+
+SELECT Cliente FROM Pedidos WHERE Cliente = 'C50000';
+
+>>Query Run In:Resultado de la Consulta 2
+Transcurrido: 00:00:00.339
+
+
+SELECT * FROM Pedidos WHERE Cliente = 'C50000';
+
+DROP INDEX index_pedidos;
+
+//	SIN ÍNDICE
+>>Query Run In:Resultado de la Consulta
+Transcurrido: 00:00:00.599
+
+SELECT Cliente FROM Pedidos WHERE Cliente = 'C50000';
+
+>>Query Run In:Resultado de la Consulta 4
+Transcurrido: 00:00:00.342

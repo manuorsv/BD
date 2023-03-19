@@ -1,0 +1,19 @@
+CREATE TABLE "Domicilios I" 
+(
+    DNI CHAR(9),
+    Calle CHAR(50),
+    "Código postal" CHAR(5)
+);
+
+Table "Domicilios I" created.
+
+CREATE TABLE "Códigos postales I"
+(
+    "Código postal" CHAR(5),
+    Población CHAR(50),
+    Provincia CHAR(50)
+);
+
+Table "Códigos postales I" created.
+
+

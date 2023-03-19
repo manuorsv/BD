@@ -1,0 +1,22 @@
+CREATE VIEW CLIENTES_VIEW AS SELECT Código,Cliente FROM Pedidos;
+CREATE MATERIALIZED VIEW CLIENTES_MAT AS SELECT Código,Cliente FROM Pedidos;
+
+View CLIENTES_VIEW creado.
+
+Materialized view CLIENTES_MAT creado.
+
+create index index_over_view on CLIENTES_VIEW(Cliente);
+
+Error que empieza en la línea: 19 del comando :
+create index index_over_view on CLIENTES_VIEW(Cliente)
+Informe de error -
+ORA-01702: una vista no es apropiada aquí
+01702. 00000 -  "a view is not appropriate here"
+*Cause:    Among other possible causes, this message will be produced if an
+           attempt was made to define an Editioning View over a view.
+*Action:   An Editioning View may only be created over a base table.
+
+
+create index index_over_view on CLIENTES_MAT(Cliente);
+
+Index INDEX_OVER_VIEW creado.

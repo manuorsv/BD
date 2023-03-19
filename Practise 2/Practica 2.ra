@@ -1,0 +1,133 @@
+﻿-- FRANCISCO JAVIER BLÁZQUEZ MARTÍNEZ  ~  frblazqu@ucm.es
+-- MANUEL ALEJANDRO ORTEGA SALVADOR    ~  manuwolf@gmail.com
+--
+--   Doble grado Ingeniería informática - Matemáticas
+--	 Universidad Complutense de Madrid.
+--
+-- Comentarios:
+-- 
+-- Hemos optado por convenio nombrar a las tablas de forma que cada barra baja '_' separe los atributos
+-- de esta relación y se representen los nombres de los atributos lo más fielmente posible. De esta forma
+-- la relación de empleados y proyectos en los que trabajan se podría nombrar "dniEmp_códigoPr"
+
+-- 0.- Eliminamos todos los datos que pudiéramos tener
+/abolish
+
+-- 1.- Definimos las tablas que vamos a necesitar.
+create table programadores(dni string primary key, nombre string, dirección string, teléfono string);
+create table analistas    (dni string primary key, nombre string, dirección string, teléfono string);
+create table distribución(códigopr string, dniemp string, horas int, primary key (códigopr, dniemp));
+create table proyectos(código string primary key, descripción string, dnidir string);
+
+-- 2.- Introducimos los datos en nuestra base.
+insert into  programadores(dni, nombre, dirección, teléfono) values('1','Jacinto','Jazmín 4','91-8888888');
+insert into  programadores(dni, nombre, dirección, teléfono) values('2','Herminia','Rosa 4','91-7777777');
+insert into  programadores(dni, nombre, dirección, teléfono) values('3','Calixto','Clavel 3','91-1231231');
+insert into  programadores(dni, nombre, dirección, teléfono) values('4','Teodora','Petunia 3','91-6666666');
+
+insert into  analistas(dni, nombre, dirección, teléfono) values('4','Teodora','Petunia 3','91-6666666');
+insert into  analistas(dni, nombre, dirección, teléfono) values('5','Evaristo','Luna 1','91-1111111');
+insert into  analistas(dni, nombre, dirección, teléfono) values('6','Luciana','Júpiter 2','91-8888888');
+insert into  analistas(dni, nombre, dirección, teléfono) values('7','Nicodemo','Plutón 3', NULL);
+
+insert into distribución(códigopr, dniemp, horas) values('P1','1',10);
+insert into distribución(códigopr, dniemp, horas) values('P1','2',40);
+insert into distribución(códigopr, dniemp, horas) values('P1','4',5);
+insert into distribución(códigopr, dniemp, horas) values('P2','4',10);
+insert into distribución(códigopr, dniemp, horas) values('P3','1',10);
+insert into distribución(códigopr, dniemp, horas) values('P3','3',40);
+insert into distribución(códigopr, dniemp, horas) values('P3','4',5);
+insert into distribución(códigopr, dniemp, horas) values('P3','5',30);
+insert into distribución(códigopr, dniemp, horas) values('P4','4',20);
+insert into distribución(códigopr, dniemp, horas) values('P4','5',10);
+
+insert into proyectos(código, descripción, dnidir) values('P1','Nómina','4');
+insert into proyectos(código, descripción, dnidir) values('P2','Contabilidad','4');
+insert into proyectos(código, descripción, dnidir) values('P3','Producción','5');
+insert into proyectos(código, descripción, dnidir) values('P4','Clientes','5');
+insert into proyectos(código, descripción, dnidir) values('P5','Ventas','6');
+
+-- 3.- Realizamos las consultas
+empleados 		:= analistas union programadores;
+dniEmpleados 	:= project dni (empleados);
+códigosPr 		:= project código (proyectos);
+stdDistribución := rename stdDistribución(código,dni,horas) (distribución);
+stdProyectos 	:= rename stdProyectos(código,descripción,dni) (proyectos);
+
+-- 3.1.- Dni de programadores que también son analistas usando natural join:
+--	     No hace falta distinción de casos pues al ser el dni la clave primaria
+-- 		 en ningún caso puede ser nulo.
+vista1 := project dni (programadores) njoin project dni (analistas);
+
+-- 3.2.- Determinar el número de horas totales que trabaja cada empleado:
+--		 Dividimos entre empleados que trabajan en algún proyecto y empleados ociosos.
+-- 		 Marcamos los ociosos como que trabajan 0 horas (para evitar problemas con valores
+-- 		 nulos y agrupamos los no ociosos para saber su número de horas, unimos ambos resultados.
+dniEmpNoAsignados       := dniEmpleados difference (project dniemp (distribución));
+dniEmpNoAsignados_horas := dniEmpNoAsignados product (project 0 horas (dual)); 
+dniEmpAsignados_horas   := group_by dniemp dniemp,sum(horas) true (project dniemp,horas (distribución));
+vista2 := dniEmpNoAsignados_horas union dniEmpAsignados_horas;
+
+-- 3.3.- Listado de dni de todos los empleados, nombre y código de proyecto asignado:
+--	     Tomamos el dni y nombre de todos los empleados y hacemos un natural left join con los
+-- 		 dnis de empleados y su código de proyecto. (Left join para no perder empleados).
+dniEmp_nombre   := project dni,nombre (empleados);
+dniEmp_códigoPr := project dni,código (stdDistribución);
+vista3 := dniEmp_nombre nljoin dniEmp_códigoPr;
+
+-- 3.4.- Dni y nombre de empleados de los que no se tiene registrado número de teléfono:
+vista4 := project dni,nombre (select teléfono is null (empleados));
+
+-- 3.5.- Empleados tales que:
+--
+--	 totalHorasEmpleado           totalHorasProyecto
+--  -------------------- < media(--------------------)
+--	nºProyectosParticipa          nºEmpleadosProyecto 
+--
+-- NO HAY QUE CONTAR LOS PROYECTOS EN LOS QUE EVARISTO ES DIRECTOR!
+
+dniEmp_totalHoras         := rename dniEmp_totalHoras(dni,totalHoras) (vista2);
+dniEmp_numProyectos       := rename a(dni,numProyectos) (group_by dni dni,count(código) true (stdDistribución));
+dniEmp_totalHoras_numProyectos := dniEmp_totalHoras njoin dniEmp_numProyectos;
+dniEmp_mediaHorasProyecto := rename a(dni, mediaHorasProyecto) (project dni,totalHoras/numProyectos (dniEmp_totalHoras_numProyectos));
+proyecto_totalHoras_numEmps := rename a(código,totalHoras,numEmps) (group_by código código,sum(horas),count(dni) true (stdDistribución));
+mediaHorasProyectoEntreEmpleados := rename a(value) (group_by [] avg(totalHoras/numEmps) true (proyecto_totalHoras_numEmps));
+vista5 := select mediaHorasProyecto<value (dniEmp_mediaHorasProyecto product mediaHorasProyectoEntreEmpleados);
+
+-- 3.6.- Horas por proyecto ampliadas un 20% de los empleados que no trabajen con Evaristo:
+--		 Tomamos los códigos de los proyectos en los que no trabaja evaristo, y mostramos la
+--       distribución de proyectos con estos códigos.
+códigosPrTrabajaEvaristo 	:= project código (select dni='5' (stdDistribución));
+códigosPrNoTrabajaEvaristo 	:= códigosPr difference códigosPrTrabajaEvaristo;
+vista6 := project dni,código,1.2*horas (códigosPrNoTrabajaEvaristo njoin stdDistribución);
+
+-- 3.7.- Usando la división dar el dni de los que trabajan en todos los proyectos que trabaja Evaristo:
+--		 Tomamos de la distribución de empleados los dnis y códigos de proyecto de todos menos Evaristo
+-- 		 y vemos que dnis aparecen en esta distribución para todos los códigospr de Evaristo.
+dniEmpNoEvaristo_códigoPr := project dni,código (select dni!='5' (stdDistribución));
+vista7 := dniEmpNoEvaristo_códigoPr division códigosPrTrabajaEvaristo;
+
+-- 3.8.- Apartado anterior sin usar la división:
+--       Si combinamos los dnis de los empleados que no son Evaristo con los códigos de proyecto donde
+--		 este trabaja y le quitamos los pares dni empleado, proyecto donde trabaja de la distribución 
+--       actual, conseguimos pares dniEmp y código de proyecto en el que trabaja evaristo que no están 
+--       en la distribución, por tanto este dni no lo queremos mostrar.
+dniEmpNoEvaristo := select dni!='5' (dniEmpleados);
+dniEmpNoEvaristo_prEvaristo := dniEmpNoEvaristo product códigosPrTrabajaEvaristo;
+dniEmpNoTrabajanEvaristo := project dni (dniEmpNoEvaristo_prEvaristo difference dniEmpNoEvaristo_códigoPr);
+vista8 := dniEmpNoEvaristo difference dniEmpNoTrabajanEvaristo;
+
+-- 3.9.- Cierre transitivo de dependencias director-empleado empezando por Evaristo:
+dependenEvaristo(dni) := (project '5' dni (dual)) union (project dni (stdDistribución njoin (project  código (stdProyectos njoin dependenEvaristo))));
+vista9 := dependenEvaristo;
+
+
+-- 4.- Mostramos el resultado obtenido
+select true (vista1);
+select true (vista2);
+select true (vista3);
+select true (vista4);
+select true (vista5);
+select true (vista6);
+select true (vista7);
+select true (vista8);

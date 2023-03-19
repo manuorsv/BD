@@ -1,0 +1,48 @@
+Explicar el comportamiento del sistema en la siguiente secuencia:
+
+T1:> SET AUTOCOMMIT OFF
+T2:> SET AUTOCOMMIT OFF
+
+T1:> ALTER SESSION SET ISOLATION_LEVEL = SERIALIZABLE
+Sesi¾n modificada.
+
+T1:> SELECT SUM(saldo) FROM cuentas
+SUM(SALDO)
+----------
+       700
+
+T2:> UPDATE cuentas SET saldo=saldo +100
+2 filas actualizadas.
+
+T2:> COMMIT
+Confirmaci¾n terminada.
+
+T1:> SELECT SUM(saldo) FROM cuentas
+SUM(SALDO)
+----------
+       700
+
+	   
+	   
+
+T1:> ALTER SESSION SET ISOLATION_LEVEL = READ COMMITTED
+Sesi¾n modificada.
+
+T1:> SELECT SUM(saldo) FROM cuentas
+SUM(SALDO)
+----------
+       900
+
+T2:> UPDATE cuentas SET saldo=saldo +100
+2 filas actualizadas.
+   
+T2:> COMMIT
+Confirmaci¾n terminada.
+
+T1:> SELECT SUM(saldo) FROM cuentas
+SUM(SALDO)
+----------
+      1100
+
+Explicar diferencias entre los niveles de aislamiento.
+

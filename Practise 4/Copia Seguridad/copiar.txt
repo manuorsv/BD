@@ -1,0 +1,80 @@
+exp USERid=CC04/CC04PWD@BDd owner=CC04
+
+Export: Release 11.2.0.1.0 - Production on Lun Oct 29 18:25:02 2018
+
+Copyright (c) 1982, 2009, Oracle and/or its affiliates.  All rights reserved.
+
+
+Conectado a: Oracle Database 11g Enterprise Edition Release 11.2.0.1.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
+Exportaci¾n realizada en el juego de caracteres WE8MSWIN1252 y el juego de caracteres NCHAR AL16UTF16
+. exportando acciones y objetos de procedimiento pre-esquema
+. exportando nombres de biblioteca de funciones ajenas para el usuario CC04
+. exportando sin¾nimos de tipo p·blico
+. exportando sin¾nimos de tipo privado
+. exportando definiciones de tipos de objetos para el usuario CC04
+Exportando los objetos de CC04  ...
+. exportando enlaces a la base de datos
+. exportando n·meros de secuencia
+. exportando definiciones de cluster
+. exportando las tablas de CC04 a travÚs de la Ruta de Acceso Convencional ...
+. exportando la tabla               Códigos postales          6 filas exportadas
+. exportando la tabla                     DOMICILIOS          4 filas exportadas
+. exportando la tabla                      EMPLEADOS          4 filas exportadas
+. exportando la tabla                      TEL+FONOS          4 filas exportadas
+. exportando sin¾nimos
+. exportando vistas
+. exportando procedimientos almacenados
+. exportando operadores
+. exportando restricciones de integridad referencial
+. exportando disparadores
+. exportando tipos de Ýndice
+. exportando Ýndices bitmap, funcionales y extensibles
+. exportando acciones de posttables
+. exportando vistas materializadas
+. exportando logs de instantßneas
+. exportando colas de trabajo
+. exportando grupos de refrescamiento y secundarios
+. exportando dimensiones
+. exportando acciones y objetos de procedimiento post-esquema
+. exportando estadÝsticas
+La exportaci¾n ha terminado correctamente y sin advertencias.
+
+
+Se ha creado el fichero "EXPDAT.DMP" Memory Dump File.
+
+-------------------------------------------------------------------------------------------------------------------------------
+
+IMP USERID=CC04/CC04PWD@BDd TOUSER=CC04 FILE=EXPDAT.DMP
+
+Import: Release 11.2.0.1.0 - Production on Lun Oct 29 18:27:57 2018
+
+Copyright (c) 1982, 2009, Oracle and/or its affiliates.  All rights reserved.
+
+
+Conectado a: Oracle Database 11g Enterprise Edition Release 11.2.0.1.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
+
+Archivo de exportaci¾n creado por EXPORT:V11.02.00 a travÚs de la ruta de acceso convencional
+importaci¾n realizada en el juego de caracteres WE8MSWIN1252 y el juego de caracteres NCHAR AL16UTF16
+IMP-00015: la siguiente sentencia ha fallado porque el objeto ya existe:
+ "CREATE TABLE "Códigos postales" ("Código postal" CHAR(5), "POBLACIËN" CHAR("
+ "50), "PROVINCIA" CHAR(50))  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 S"
+ "TORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 FREELISTS 1 FREELIST GROUPS "
+ "1 BUFFER_POOL DEFAULT)                          LOGGING NOCOMPRESS"
+IMP-00015: la siguiente sentencia ha fallado porque el objeto ya existe:
+ "CREATE TABLE "DOMICILIOS" ("DNI" CHAR(9), "CALLE" CHAR(50), "C¾digo postal""
+ " CHAR(5))  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 STORAGE(INITIAL 65"
+ "536 NEXT 1048576 MINEXTENTS 1 FREELISTS 1 FREELIST GROUPS 1 BUFFER_POOL DEF"
+ "AULT)                          LOGGING NOCOMPRESS"
+IMP-00015: la siguiente sentencia ha fallado porque el objeto ya existe:
+ "CREATE TABLE "EMPLEADOS" ("NOMBRE" CHAR(50) NOT NULL ENABLE, "DNI" CHAR(9),"
+ " "SUELDO" NUMBER(6, 2))  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 STOR"
+ "AGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 FREELISTS 1 FREELIST GROUPS 1 B"
+ "UFFER_POOL DEFAULT)                          LOGGING NOCOMPRESS"
+IMP-00015: la siguiente sentencia ha fallado porque el objeto ya existe:
+ "CREATE TABLE "TEL+FONOS" ("DNI" CHAR(9), "TEL+FONO" CHAR(9))  PCTFREE 10 PC"
+ "TUSED 40 INITRANS 1 MAXTRANS 255 STORAGE(INITIAL 65536 NEXT 1048576 MINEXTE"
+ "NTS 1 FREELISTS 1 FREELIST GROUPS 1 BUFFER_POOL DEFAULT)                   "
+ "       LOGGING NOCOMPRESS"
+La importación ha terminado correctamente pero con advertencias.
